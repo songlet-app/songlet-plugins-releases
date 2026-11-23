@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-23T21:42:03Z",
+  "plugins": [
+    {
+      "id": "bypass-relay",
+      "name": "绕行代理",
+      "summary": "按配置的域名经中转服务器转发，仅作用于命中的 HTTPS 目标",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "hostApi": 1,
+          "minAppVersion": "1.0.2",
+          "publishedAt": "2026-11-23T21:41:10Z",
+          "revoked": false,
+          "artifacts": [
+            {
+              "platform": "windows/amd64",
+              "url": "https://github.com/songlet-app/songlet-plugins-releases/releases/download/v0.1.0/bypass-relay-0.1.0-windows-amd64.songlet",
+              "sha256": "cd0ca9d2c971c5ecaeaed1a15c9b17027866b20865e5b06bcb9929ab4de6cc05",
+              "size": 3062256
+            },
+            {
+              "platform": "darwin/arm64",
+              "url": "https://github.com/songlet-app/songlet-plugins-releases/releases/download/v0.1.0/bypass-relay-0.1.0-darwin-arm64.songlet",
+              "sha256": "0f87dd2869f1a8e9558df4f82a62d68d84e6b38684301fe054e823276d96090f",
+              "size": 2818017
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

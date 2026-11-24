@@ -1,13 +1,34 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-24T05:53:04Z",
+  "generatedAt": "2026-11-24T06:00:22Z",
   "plugins": [
     {
       "id": "bypass-relay",
       "name": "绕行代理",
       "summary": "按配置的域名与端口经中转服务器转发；HTTPS 由 PAC 接管，SSH 可用固定本地转发或固定 CONNECT 端口",
-      "description": "绕行代理用于访问只能经中转服务器到达的内部站点：命中配置目标的 HTTPS 流量经中转转发，其他流量保持直连。\n\n使用方法：\n1. 打开插件设置，填写「中转地址」（wss:// 开头，由中转管理员提供）。\n2. 填写「中转令牌」，令牌只加密保存在本机。\n3. 在「绕行目标」中每行填写一个站点，例如 gitlab.example.com；默认端口 443，子域可用 *.example.com，SSH 需显式写 :22。\n4. 保存设置并启用插件。浏览器访问目标站点时会自动经中转，其余网站直连。\n\nGit 与 SSH（可选）：\n- SSH：在「本地 TCP 转发」填写 3222=gitlab.example.com:22，并在 ~/.ssh/config 中把该主机的 HostName 改为 127.0.0.1、Port 改为 3222，HostKeyAlias 保持原域名。\n- Git HTTPS：把「本地代理端口」固定为 31289，然后执行 git config --global http.https://gitlab.example.com.proxy http://127.0.0.1:31289。\n\n注意事项：\n- 只有 HTTPS 会被 PAC 自动接管；HTTP 和 SSH 不会自动走代理。\n- 停止插件、停用或授权失效时，会自动恢复原有的系统代理设置。\n- 插件以当前用户权限运行，请只安装可信来源的插件。\n- 启动失败时先检查中转地址、令牌和网络连通性；更多信息见插件日志。",
+      "description": "绕行代理 = 本机 sidecar + 中转服务器 relayd。只有命中「绕行目标」的 HTTPS 流量经 wss:// 中转，其余流量保持直连。中转服务器由管理员部署，普通用户只需要填写地址、令牌和目标。\n\n【一、管理员：部署中转服务器 relayd（Linux，需 root）】\n\nrelayd 只交付源码，不在插件包内；下面的命令在装有 Go 1.26 的构建机执行。\n\n1. 编译并上传（源码来自内部仓 songlet-plugins）：\ngit clone git@github.com:songlet-app/songlet-plugins.git\ncd songlet-plugins\nCGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags \"-s -w\" -o relayd ./cmd/relayd\nscp relayd root@relay.example.com:/tmp/relayd\n\n2. 在服务器上创建运行用户并安装：\nsudo useradd --system --no-create-home --shell /usr/sbin/nologin relayd\nsudo install -m 755 -o root -g root /tmp/relayd /usr/local/bin/relayd\nsudo install -d -m 750 -o root -g relayd /etc/relayd\n\n3. 生成客户端令牌与服务端哈希（只生成一次，令牌妥善保存；第 3-5 步在同一 shell 会话执行，避免 HASH 丢失）：\nTOKEN=\"$(openssl rand -base64 32)\"\nHASH=\"$(printf '%s' \"$TOKEN\" | sha256sum | cut -d' ' -f1)\"\necho \"客户端令牌（填入 Songlet）：$TOKEN\"\necho \"服务端哈希（填入 tokens）：sha256:$HASH\"\n\n4. 写配置。relayd 只监听回环，由 Caddy 终止 TLS；allow 必须显式列出所有目标，端口要与客户端一致，SSH 必须单独写 :22：\nsudo tee /etc/relayd/config.json \u003e/dev/null \u003c\u003cEOF\n{\n  \"listen\": \"127.0.0.1:8080\",\n  \"path\": \"/tunnel\",\n  \"allow_plaintext\": true,\n  \"allow\": [\n    \"gitlab.example.com:443\",\n    \"gitlab.example.com:22\",\n    \"*.internal.example.com:443\"\n  ],\n  \"tokens\": [\"sha256:$HASH\"],\n  \"limits\": {\n    \"max_connections\": 512,\n    \"max_connections_per_token\": 64,\n    \"idle_timeout\": \"5m\",\n    \"dial_timeout\": \"10s\",\n    \"handshake_timeout\": \"10s\"\n  }\n}\nEOF\nsudo chown relayd:relayd /etc/relayd/config.json\nsudo chmod 600 /etc/relayd/config.json\nsudo -u relayd /usr/local/bin/relayd -config /etc/relayd/config.json -check\n\n5. 安装 systemd 服务并启动：\nsudo tee /etc/systemd/system/relayd.service \u003e/dev/null \u003c\u003c'EOF'\n[Unit]\nDescription=Songlet bypass relay\nAfter=network-online.target\nWants=network-online.target\n\n[Service]\nUser=relayd\nGroup=relayd\nExecStart=/usr/local/bin/relayd -config /etc/relayd/config.json\nRestart=on-failure\nRestartSec=3s\nNoNewPrivileges=true\nPrivateTmp=true\nProtectSystem=strict\nProtectHome=true\nReadOnlyPaths=/etc/relayd\n\n[Install]\nWantedBy=multi-user.target\nEOF\nsudo systemctl daemon-reload\nsudo systemctl enable --now relayd\nsudo systemctl status --no-pager relayd\n\n6. 用 Caddy 提供 wss://（自动申请和续期证书）。先把 relay.example.com 的 A/AAAA 记录指向本机，并放行 80/443：\nsudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl\ncurl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg\ncurl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list \u003e/dev/null\nsudo apt update \u0026\u0026 sudo apt install -y caddy\n\nsudo tee /etc/caddy/Caddyfile \u003e/dev/null \u003c\u003c'EOF'\nrelay.example.com {\n    @tunnel path /tunnel\n    handle @tunnel {\n        reverse_proxy 127.0.0.1:8080 { flush_interval -1 }\n    }\n    handle /healthz {\n        reverse_proxy 127.0.0.1:8080\n    }\n}\nEOF\nsudo systemctl reload caddy\n\n7. 验证：\ncurl -fsS http://127.0.0.1:8080/healthz\ncurl -fsS https://relay.example.com/healthz\njournalctl -u relayd -n 50 --no-pager\n\n说明：\n- Debian/Ubuntu 用上面的 apt 命令；RHEL 系用 dnf 安装 Caddy 后，Caddyfile 相同。\n- 如启用 ufw：sudo ufw allow 80/tcp \u0026\u0026 sudo ufw allow 443/tcp。\n- 不用反向代理时，也可让 relayd 直接监听 0.0.0.0:443：配置 tls.cert / tls.key（certbot 证书）、删除 allow_plaintext，并给服务加 AmbientCapabilities=CAP_NET_BIND_SERVICE；运行用户必须能读私钥。\n- 公网只暴露 443 的 /tunnel 与 /healthz，不要转发其他路径。\n\n【二、客户端：Songlet 插件设置】\n\n1. 中转地址：wss://relay.example.com/tunnel（必须是 wss://，路径与 relayd 的 path 一致）\n2. 中转令牌：第 3 步输出的 TOKEN，原样粘贴，不要带换行或空格\n3. 绕行目标：每行一个，省略端口默认 443；服务端 allow 必须同时放行，端口一致\n   示例：gitlab.example.com、*.internal.example.com、gitlab.example.com:22\n4. 本地代理端口：需要 Git HTTPS 时固定填 31289，否则保持 0\n5. 本地 TCP 转发：需要 SSH 时填 3222=gitlab.example.com:22\n6. 保存并启用。PAC 只接管 HTTPS；未命中目标直连；中转不可达或令牌错误时插件不会启用 PAC。\n\n【三、SSH 与 Git 接入（Windows）】\n\nSSH（推荐固定本地转发；客户端目标和服务端 allow 都要包含 gitlab.example.com:22）：\n- 本地 TCP 转发填：3222=gitlab.example.com:22\n- 在 %USERPROFILE%\\.ssh\\config 追加：\nHost gitlab.example.com\n  HostName 127.0.0.1\n  Port 3222\n  HostKeyAlias gitlab.example.com\n- 验证：\nssh -T git@gitlab.example.com\ngit clone git@gitlab.example.com:group/repo.git\n\nGit HTTPS（本地代理端口固定 31289，修改固定端口后停止再启动插件）：\ngit config --global http.https://gitlab.example.com.proxy http://127.0.0.1:31289\ngit config --global --get http.https://gitlab.example.com.proxy\n取消：git config --global --unset http.https://gitlab.example.com.proxy\n\n说明：SSH 也可以用 Git 自带的 connect.exe 作为 ProxyCommand，但 Windows 上系统 OpenSSH 经 ProxyCommand 可能报错，固定本地转发是首选。\n\n【四、常见错误】\n\n401 unauthorized：令牌不一致，或被前置代理丢弃；确认两端完全相同且无换行。\n429 rate_limited：超过并发上限；调大 max_connections_per_token 或排查连接泄漏。\ntarget_not_allowed：服务端 allow 未放行该 host:port；客户端与服务端端口必须一致。\n502：中转断开或目标拨号失败；查看插件日志与 relayd 日志。\n403：目标不在客户端绕行目标中，或端口不一致（HTTPS 443 / SSH 22）。\n启动提示中转不可用：检查 DNS、证书、80/443 与令牌；企业网络可能拦截未知域名的 wss。\n固定端口被占用：更换本地代理端口或转发端口；端口冲突时插件会启动失败。\n\n【五、轮换与安全】\n\n- 令牌轮换：tokens 同时保留新旧哈希并重启 relayd → 客户端换新令牌 → 确认全部切换后再删除旧哈希。\n- 证书续期：Caddy 自动完成；直接 TLS 时用 certbot 续期后重启 relayd。\n- allow 只放行必要目标；relay_token 仅在本机加密保存；日志不含令牌与流量内容。\n- 只有 HTTPS 会被 PAC 自动接管；SSH 需按上面的固定转发接入，HTTP 不支持经中转。",
       "versions": [
+        {
+          "version": "0.1.3",
+          "hostApi": 1,
+          "minAppVersion": "1.0.2",
+          "publishedAt": "2026-11-24T05:59:41Z",
+          "revoked": false,
+          "artifacts": [
+            {
+              "platform": "windows/amd64",
+              "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/bypass-relay-0.1.3-windows-amd64.songlet",
+              "sha256": "1cc2db04ca1e2a05986939c7132f62d22895e08f13ce3b68f608fbcf888421ff",
+              "size": 3077484
+            },
+            {
+              "platform": "darwin/arm64",
+              "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/bypass-relay-0.1.3-darwin-arm64.songlet",
+              "sha256": "1a34bc7ef9bc32775aa72db4505681b643f1903f142084b5b5dee5bd102bc08b",
+              "size": 2835049
+            }
+          ]
+        },
         {
           "version": "0.1.2",
           "hostApi": 1,

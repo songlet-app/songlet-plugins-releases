@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-23T21:42:03Z",
+  "generatedAt": "2026-11-24T01:28:10Z",
   "plugins": [
     {
       "id": "bypass-relay",
@@ -16,15 +16,15 @@
           "artifacts": [
             {
               "platform": "windows/amd64",
-              "url": "https://github.com/songlet-app/songlet-plugins-releases/releases/download/v0.1.0/bypass-relay-0.1.0-windows-amd64.songlet",
-              "sha256": "cd0ca9d2c971c5ecaeaed1a15c9b17027866b20865e5b06bcb9929ab4de6cc05",
-              "size": 3062256
+              "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/bypass-relay-0.1.0-windows-amd64.songlet",
+              "sha256": "4f29f487fe0a41b9e7d92bbea02d0002450cbb228ab7f4be9065ceb3241bd0a6",
+              "size": 3062329
             },
             {
               "platform": "darwin/arm64",
-              "url": "https://github.com/songlet-app/songlet-plugins-releases/releases/download/v0.1.0/bypass-relay-0.1.0-darwin-arm64.songlet",
-              "sha256": "0f87dd2869f1a8e9558df4f82a62d68d84e6b38684301fe054e823276d96090f",
-              "size": 2818017
+              "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/bypass-relay-0.1.0-darwin-arm64.songlet",
+              "sha256": "a42b70477ba2f7444e045a39dbc83820a31e95fe3e2f479b6487d82148877c72",
+              "size": 2818092
             }
           ]
         }

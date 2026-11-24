@@ -1,12 +1,34 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-24T03:42:18Z",
+  "generatedAt": "2026-11-24T05:53:04Z",
   "plugins": [
     {
       "id": "bypass-relay",
       "name": "绕行代理",
       "summary": "按配置的域名与端口经中转服务器转发；HTTPS 由 PAC 接管，SSH 可用固定本地转发或固定 CONNECT 端口",
+      "description": "绕行代理用于访问只能经中转服务器到达的内部站点：命中配置目标的 HTTPS 流量经中转转发，其他流量保持直连。\n\n使用方法：\n1. 打开插件设置，填写「中转地址」（wss:// 开头，由中转管理员提供）。\n2. 填写「中转令牌」，令牌只加密保存在本机。\n3. 在「绕行目标」中每行填写一个站点，例如 gitlab.example.com；默认端口 443，子域可用 *.example.com，SSH 需显式写 :22。\n4. 保存设置并启用插件。浏览器访问目标站点时会自动经中转，其余网站直连。\n\nGit 与 SSH（可选）：\n- SSH：在「本地 TCP 转发」填写 3222=gitlab.example.com:22，并在 ~/.ssh/config 中把该主机的 HostName 改为 127.0.0.1、Port 改为 3222，HostKeyAlias 保持原域名。\n- Git HTTPS：把「本地代理端口」固定为 31289，然后执行 git config --global http.https://gitlab.example.com.proxy http://127.0.0.1:31289。\n\n注意事项：\n- 只有 HTTPS 会被 PAC 自动接管；HTTP 和 SSH 不会自动走代理。\n- 停止插件、停用或授权失效时，会自动恢复原有的系统代理设置。\n- 插件以当前用户权限运行，请只安装可信来源的插件。\n- 启动失败时先检查中转地址、令牌和网络连通性；更多信息见插件日志。",
       "versions": [
+        {
+          "version": "0.1.2",
+          "hostApi": 1,
+          "minAppVersion": "1.0.2",
+          "publishedAt": "2026-11-24T05:52:25Z",
+          "revoked": false,
+          "artifacts": [
+            {
+              "platform": "windows/amd64",
+              "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/bypass-relay-0.1.2-windows-amd64.songlet",
+              "sha256": "cca1c575dadf7b675965634b9f8c0287b2582e3d62d2f23fdee18baba18b4228",
+              "size": 3074821
+            },
+            {
+              "platform": "darwin/arm64",
+              "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/bypass-relay-0.1.2-darwin-arm64.songlet",
+              "sha256": "6cb363a8a0d00d4a3f78bb0de297d1c3c5bc49e9dd138ec12e7b93af7b97082f",
+              "size": 2832380
+            }
+          ]
+        },
         {
           "version": "0.1.1",
           "hostApi": 1,

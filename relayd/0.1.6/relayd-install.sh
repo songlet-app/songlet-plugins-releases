@@ -151,7 +151,9 @@ else
     for t in "${TARGETS[@]}"; do
       valid_target "$t" || { bad_target="$t"; break; }
     done
-    [[ -z "$bad_target" ]] && break
+    if [[ -z "$bad_target" ]]; then
+      break
+    fi
     warn "目标格式不正确: $bad_target（支持 host、host:port、*.domain）"
   done
 fi
@@ -221,6 +223,23 @@ install_packages() {
 if ! install_packages; then
   die "依赖安装失败。RHEL 系请先启用 EPEL 以安装 certbot，并确认软件源可用"
 fi
+
+open_firewall_ports() {
+  if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -q '^Status: active'; then
+    ufw allow 80/tcp >/dev/null || warn "ufw 放行 80 失败"
+    ufw allow 443/tcp >/dev/null || warn "ufw 放行 443 失败"
+    info "已在 ufw 放行 80/443"
+  fi
+  if systemctl is-active --quiet firewalld 2>/dev/null; then
+    firewall-cmd --permanent --add-service=http >/dev/null || warn "firewalld 放行 http 失败"
+    firewall-cmd --permanent --add-service=https >/dev/null || warn "firewalld 放行 https 失败"
+    firewall-cmd --reload >/dev/null || warn "firewalld 重载失败"
+    info "已在 firewalld 放行 http/https"
+  fi
+}
+
+# 必须在 certbot 之前放行 80，否则 ACME HTTP-01 校验会被本机防火墙拦截。
+open_firewall_ports
 
 case "$(uname -m)" in
   x86_64|amd64) ARCH=amd64 ;;
@@ -307,7 +326,9 @@ info "客户端令牌（请立即保存，服务端只保存哈希）：$TOKEN"
 
 ALLOW_JSON=""
 for t in "${TARGETS[@]}"; do
-  [[ -n "$ALLOW_JSON" ]] && ALLOW_JSON+=", "
+  if [[ -n "$ALLOW_JSON" ]]; then
+    ALLOW_JSON+=", "
+  fi
   ALLOW_JSON+="\"$t\""
 done
 
@@ -439,18 +460,6 @@ if ! nginx -t; then
 fi
 systemctl enable nginx >/dev/null
 systemctl reload nginx || die "Nginx 重载失败"
-
-if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -q '^Status: active'; then
-  ufw allow 80/tcp >/dev/null || warn "ufw 放行 80 失败"
-  ufw allow 443/tcp >/dev/null || warn "ufw 放行 443 失败"
-  info "已在 ufw 放行 80/443"
-fi
-if systemctl is-active --quiet firewalld 2>/dev/null; then
-  firewall-cmd --permanent --add-service=http >/dev/null || warn "firewalld 放行 http 失败"
-  firewall-cmd --permanent --add-service=https >/dev/null || warn "firewalld 放行 https 失败"
-  firewall-cmd --reload >/dev/null || warn "firewalld 重载失败"
-  info "已在 firewalld 放行 http/https"
-fi
 
 info "本地服务状态：relayd=$(systemctl is-active relayd), nginx=$(systemctl is-active nginx)"
 if curl -fsS --max-time 10 "https://$DOMAIN/healthz" >/dev/null 2>&1; then

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-24T09:24:49Z",
+  "generatedAt": "2026-11-25T13:04:50Z",
   "plugins": [
     {
       "id": "bypass-relay",
@@ -173,6 +173,35 @@
               "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/bypass-relay-0.1.0-darwin-arm64.songlet",
               "sha256": "a42b70477ba2f7444e045a39dbc83820a31e95fe3e2f479b6487d82148877c72",
               "size": 2818092
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "keybridge",
+      "name": "KeyBridge",
+      "summary": "使用 Base Key 离线批量解密 TSD 文件，支持多选文件与递归文件夹",
+      "description": "KeyBridge 是一个完全离线的本地 TSD 文件解密工具。\n\n【设置】\n只需填写 Base Key，不需要服务端 URL。Base Key 按 ASCII 原样使用，不要进行十六进制解码。\n\n【使用】\n在支持插件操作窗口的 Songlet 中启动插件，点击 KeyBridge 卡片上的「解密」打开内置窗口，无需自行打开浏览器。多选文件或选择文件夹即可解密；文件夹递归识别 TSD 文件并跳过普通文件。关闭窗口仅隐藏，再次点击「解密」保留选择、进度和结果；停止或重启插件会关闭旧窗口，可能中断解密，不支持断点续传，新窗口不会自动重放任务。\n\n【输出】\n解密文件写在源文件旁，例如 报表.已解密.xlsx；重名追加 (1)、(2)，不覆盖源文件。失败清理临时输出，界面显示进度和逐文件结果。\n\n【支持范围】\nTSD type-4、版本 0x40001、非试用 BaseKey 模式、AES256EX、完整加密且 AES 对齐的无包装分块。严格校验四处头部 CRC、密钥摘要、选择器和分块长度；XLSX 额外校验 ZIP CRC、XML 和工作表。其他格式明确报告不支持。\n\n【本地运行】\n不访问远程网络，不需要管理员权限，不修改系统代理。Base Key 由宿主管理，不回传网页、不写入日志。本地 HTTP 仅监听 127.0.0.1，并校验 Host、Origin 和自定义请求头。",
+      "versions": [
+        {
+          "version": "0.2.0-beta.1",
+          "hostApi": 1,
+          "minAppVersion": "1.1.0-beta.1",
+          "publishedAt": "2026-11-25T13:04:38Z",
+          "revoked": false,
+          "artifacts": [
+            {
+              "platform": "windows/amd64",
+              "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/keybridge-0.2.0-beta.1-windows-amd64.songlet",
+              "sha256": "e4fe603b50d811ae2337a1b26464c7c964956fa96dc3018ec58778f1291787b7",
+              "size": 2899629
+            },
+            {
+              "platform": "darwin/arm64",
+              "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/keybridge-0.2.0-beta.1-darwin-arm64.songlet",
+              "sha256": "f6b6dcf0087fdd7c82c84d63865bbc300c57bf7c9040d54897f431e95378a8b5",
+              "size": 2647125
             }
           ]
         }

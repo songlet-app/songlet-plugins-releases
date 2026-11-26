@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-26T01:28:42Z",
+  "generatedAt": "2026-11-26T07:03:34Z",
   "plugins": [
     {
       "id": "bypass-relay",
@@ -184,6 +184,27 @@
       "summary": "使用 Base Key 离线批量解密 TSD 文件，支持多选文件与整个文件夹",
       "description": "KeyBridge 是一个完全离线的本地 TSD 文件解密工具。\n\n【设置】\n只需填写 Base Key，不需要服务端 URL。Base Key 请按原样填写，不要做额外转换。\n\n【使用】\n在 Songlet 中点击 KeyBridge 卡片上的「解密」打开内置窗口，无需自行打开浏览器。点击「添加文件…」或「添加文件夹…」选择内容，可重复添加不同目录，确认后点击「开始解密」。\n\n【输出】\n解密文件写在源文件旁，例如 报表.已解密.xlsx；重名追加 (1)、(2)，不覆盖源文件。界面显示进度和逐文件结果。\n\n【说明】\n解密全程在本机完成，不上传文件，不需要管理员权限。只处理受支持的 TSD 加密文件，普通文件自动跳过；不支持的格式会在结果中提示。关闭窗口不会中断解密，停止或重启插件会中断且不支持断点续传。Base Key 由宿主保管，不会显示在页面上或写入日志。",
       "versions": [
+        {
+          "version": "0.2.1",
+          "hostApi": 1,
+          "minAppVersion": "1.1.0",
+          "publishedAt": "2026-11-26T07:03:20Z",
+          "revoked": false,
+          "artifacts": [
+            {
+              "platform": "windows/amd64",
+              "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/keybridge-0.2.1-windows-amd64.songlet",
+              "sha256": "51d9ffcf04c263178259f3a8ddee2661dcaf947b12841bae9e7cf31bd3fb00f7",
+              "size": 2934943
+            },
+            {
+              "platform": "darwin/arm64",
+              "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/keybridge-0.2.1-darwin-arm64.songlet",
+              "sha256": "1f1398e23a60aa752281029ac48096e57099e280b791afb7117e8486c07f45a6",
+              "size": 2649275
+            }
+          ]
+        },
         {
           "version": "0.2.0",
           "hostApi": 1,

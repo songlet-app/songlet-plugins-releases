@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-25T13:04:50Z",
+  "generatedAt": "2026-11-26T01:28:42Z",
   "plugins": [
     {
       "id": "bypass-relay",
@@ -181,9 +181,30 @@
     {
       "id": "keybridge",
       "name": "KeyBridge",
-      "summary": "使用 Base Key 离线批量解密 TSD 文件，支持多选文件与递归文件夹",
-      "description": "KeyBridge 是一个完全离线的本地 TSD 文件解密工具。\n\n【设置】\n只需填写 Base Key，不需要服务端 URL。Base Key 按 ASCII 原样使用，不要进行十六进制解码。\n\n【使用】\n在支持插件操作窗口的 Songlet 中启动插件，点击 KeyBridge 卡片上的「解密」打开内置窗口，无需自行打开浏览器。多选文件或选择文件夹即可解密；文件夹递归识别 TSD 文件并跳过普通文件。关闭窗口仅隐藏，再次点击「解密」保留选择、进度和结果；停止或重启插件会关闭旧窗口，可能中断解密，不支持断点续传，新窗口不会自动重放任务。\n\n【输出】\n解密文件写在源文件旁，例如 报表.已解密.xlsx；重名追加 (1)、(2)，不覆盖源文件。失败清理临时输出，界面显示进度和逐文件结果。\n\n【支持范围】\nTSD type-4、版本 0x40001、非试用 BaseKey 模式、AES256EX、完整加密且 AES 对齐的无包装分块。严格校验四处头部 CRC、密钥摘要、选择器和分块长度；XLSX 额外校验 ZIP CRC、XML 和工作表。其他格式明确报告不支持。\n\n【本地运行】\n不访问远程网络，不需要管理员权限，不修改系统代理。Base Key 由宿主管理，不回传网页、不写入日志。本地 HTTP 仅监听 127.0.0.1，并校验 Host、Origin 和自定义请求头。",
+      "summary": "使用 Base Key 离线批量解密 TSD 文件，支持多选文件与整个文件夹",
+      "description": "KeyBridge 是一个完全离线的本地 TSD 文件解密工具。\n\n【设置】\n只需填写 Base Key，不需要服务端 URL。Base Key 请按原样填写，不要做额外转换。\n\n【使用】\n在 Songlet 中点击 KeyBridge 卡片上的「解密」打开内置窗口，无需自行打开浏览器。点击「添加文件…」或「添加文件夹…」选择内容，可重复添加不同目录，确认后点击「开始解密」。\n\n【输出】\n解密文件写在源文件旁，例如 报表.已解密.xlsx；重名追加 (1)、(2)，不覆盖源文件。界面显示进度和逐文件结果。\n\n【说明】\n解密全程在本机完成，不上传文件，不需要管理员权限。只处理受支持的 TSD 加密文件，普通文件自动跳过；不支持的格式会在结果中提示。关闭窗口不会中断解密，停止或重启插件会中断且不支持断点续传。Base Key 由宿主保管，不会显示在页面上或写入日志。",
       "versions": [
+        {
+          "version": "0.2.0",
+          "hostApi": 1,
+          "minAppVersion": "1.1.0",
+          "publishedAt": "2026-11-26T01:28:29Z",
+          "revoked": false,
+          "artifacts": [
+            {
+              "platform": "windows/amd64",
+              "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/keybridge-0.2.0-windows-amd64.songlet",
+              "sha256": "9984eec9e2ce456cab68a495227ae4a0fdc0eba711752fe46c3c8e955557f9a3",
+              "size": 2934103
+            },
+            {
+              "platform": "darwin/arm64",
+              "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/keybridge-0.2.0-darwin-arm64.songlet",
+              "sha256": "01d98c1a2947389505b5782696c0e265586bfd766f36163df364506397f26e3c",
+              "size": 2647342
+            }
+          ]
+        },
         {
           "version": "0.2.0-beta.1",
           "hostApi": 1,

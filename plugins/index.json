@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-27T01:55:51Z",
+  "generatedAt": "2026-11-27T01:58:42Z",
   "plugins": [
     {
       "id": "bypass-relay",
@@ -224,8 +224,29 @@
       "id": "keybridge",
       "name": "KeyBridge",
       "summary": "使用 Base Key 离线批量解密 TSD 文件，支持多选文件与整个文件夹",
-      "description": "KeyBridge 是一个完全离线的本地 TSD 文件解密工具。\n\n【设置】\n只需填写 Base Key，不需要服务端 URL。Base Key 请按原样填写，不要做额外转换。\n\n【使用】\n在 Songlet 中点击 KeyBridge 卡片上的「解密」打开内置窗口，无需自行打开浏览器。点击「添加文件…」或「添加文件夹…」选择内容，可重复添加不同目录，确认后点击「开始解密」。\n\n【输出】\n解密文件写在源文件旁，例如 报表.已解密.xlsx；重名追加 (1)、(2)，不覆盖源文件。界面显示进度和逐文件结果。\n\n【说明】\n解密全程在本机完成，不上传文件，不需要管理员权限。只处理受支持的 TSD 加密文件，普通文件自动跳过；不支持的格式会在结果中提示。关闭窗口不会中断解密，停止或重启插件会中断且不支持断点续传。Base Key 由宿主保管，不会显示在页面上或写入日志。",
+      "description": "KeyBridge 是一个完全离线的本地 TSD 文件解密工具。\n\n【设置】\n只需填写 Base Key，不需要服务端 URL。Base Key 请按原样填写，不要做额外转换。\n\n【使用】\n在 Songlet 中点击 KeyBridge 卡片上的「解密」打开内置窗口，无需自行打开浏览器。点击「添加文件…」或「添加文件夹…」选择内容，Windows 与 macOS 会打开系统文件选择对话框（中文系统显示中文），可重复添加不同目录，确认后点击「开始解密」。\n\n【输出】\n解密文件写在源文件旁，例如 报表.已解密.xlsx；重名追加 (1)、(2)，不覆盖源文件。界面显示进度和逐文件结果。\n\n【说明】\n解密全程在本机完成，不上传文件，不需要管理员权限。只处理受支持的 TSD 加密文件，普通文件自动跳过；不支持的格式会在结果中提示。关闭窗口不会中断解密，停止或重启插件会中断且不支持断点续传。Base Key 由宿主保管，不会显示在页面上或写入日志。\n\n正式支持 Windows x64 与 Apple Silicon Mac（darwin/arm64）；Intel Mac 与 Windows arm64 不支持。插件由宿主下载安装，macOS 可执行文件由 Go 链接器签名，不需要管理员权限或额外 codesign。",
       "versions": [
+        {
+          "version": "0.2.3",
+          "hostApi": 1,
+          "minAppVersion": "1.1.0",
+          "publishedAt": "2026-11-27T01:58:33Z",
+          "revoked": false,
+          "artifacts": [
+            {
+              "platform": "windows/amd64",
+              "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/keybridge-0.2.3-windows-amd64.songlet",
+              "sha256": "6aef6d192fe7e11dbc8b89383dd617fc32cfe38848852af5ce5a7d5dfd32f531",
+              "size": 2935448
+            },
+            {
+              "platform": "darwin/arm64",
+              "url": "https://songlet-app.github.io/songlet-plugins-releases/plugins/packages/keybridge-0.2.3-darwin-arm64.songlet",
+              "sha256": "2effae241404539d9917d71a3be20f4068ece3f71a0525d8d44910a677143f8f",
+              "size": 2695679
+            }
+          ]
+        },
         {
           "version": "0.2.2",
           "hostApi": 1,
